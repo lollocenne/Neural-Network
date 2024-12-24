@@ -13,6 +13,13 @@ class NeuralNetwork:
             "tanh": lambda x: math.tanh(x),
             "relu": lambda x: max(0, x)
         }
+        self.activationFunctionsDerivatives = {
+            "binaryStep": lambda x: 0,
+            "linear": lambda x: 1,
+            "sigmoid": lambda x: self.activationFunctions["sigmoid"](x) * (1 - self.activationFunctions["sigmoid"](x)),
+            "tanh": lambda x: 1 - self.activationFunctions["tanh"](x) ** 2,
+            "relu": lambda x: 1 if x > 0 else 0
+        }
     
     # Add a layer to the neural network, connect the last layer to the new layer
     def addLayer(self, size: int, activationFunction: str = "linear"):
@@ -56,8 +63,9 @@ class NeuralNetwork:
             cost += self.nodeCost(x[i], Y[i])
         return cost
     
+    # Learn using the gradient descent
     def learn(self, xTrain: list[float], YTrain: list[float], learningRate: float):
-        h = 0.0001
+        h = 0.1
         startCost = self.cost(xTrain, YTrain)
         
         # Calculate the gradient of the cost function with respect to the weights and biases (exluding the output layer)
@@ -88,12 +96,10 @@ class NeuralNetwork:
         
         self.layers[-1].applyGradients(learningRate)
     
-    def calculateAccuracy(self, inputs: list[float], Y: list[float]) -> float:
-        output = self.forward(inputs)
-        totAcc = 0
-        for i in range(len(output)):
-            totAcc += output[i] * 100 / Y[i]
-        return totAcc / len(Y)
+    # Train the neural network
+    def train(self, inputs: list[list[float]], expectedOutputs: list[list[float]], learningRate: float):
+        for i in range(len(inputs)):
+            self.learn(inputs[i], expectedOutputs[i], learningRate)
     
     def __str__(self):
         neuralNetwork = ""
@@ -112,8 +118,8 @@ if __name__ == "__main__":
     #print(nn.forward([0, 1]))
     
     
-    x = [0, 1]
-    Y = [1]
+    x = [[0, 1]]
+    Y = [[1]]
     while True:
-        nn.learn(x, Y, 0.01)
-        print(f"{nn.calculateAccuracy(x, Y):.3f} %")
+        nn.train(x, Y, 0.01)
+        print(nn.forward(x[0]))
