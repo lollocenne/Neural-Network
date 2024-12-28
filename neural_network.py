@@ -85,9 +85,18 @@ class NeuralNetwork:
         self.layers[0].updateInputLayerGradients(actCos)
     
     # Train the neural network
-    def train(self, inputs: list[list[float]], expectedOutputs: list[list[float]], learningRate: float):
-        for i in range(len(inputs)):
-            self.learn(inputs[i], expectedOutputs[i], learningRate)
+    def train(self, inputs: list[list[float]], expectedOutputs: list[list[float]], learningRate: float, batchSize: int = None):
+        if batchSize is None: batchSize = len(inputs)
+        numBatches = (len(inputs) + batchSize - 1) // batchSize  # Arrotondamento verso l'alto
+
+        for batchIndex in range(numBatches):
+            startIndex = batchIndex * batchSize
+            endIndex = min(startIndex + batchSize, len(inputs))
+            batchInputs = inputs[startIndex:endIndex]
+            batchOutputs = expectedOutputs[startIndex:endIndex]
+            for i in range(len(batchInputs)):
+                self.learn(batchInputs[i], batchOutputs[i], learningRate)
+    
     
     def __str__(self):
         neuralNetwork = ""
