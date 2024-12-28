@@ -1,4 +1,7 @@
+# To know more about activation functions see https://en.wikipedia.org/wiki/Activation_function#Table_of_activation_functions
+
 import math
+
 
 # Activation functions
 
@@ -11,7 +14,7 @@ def relu(x): return max(0, x)
 # Activation functions derivatives
 
 def binaryStepDerivative(x): return 0
-def linearDerivative(x): 1
+def linearDerivative(x): return 1
 def sigmoidDerivative(x):
     sig = sigmoid(x)
     return sig * (1 - sig)
