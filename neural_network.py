@@ -20,10 +20,12 @@ class NeuralNetwork:
             "relu": activation_functions.reluDerivative
         }
         self.costFunctions = {
-            "squaredError": cost_functions.squaredError
+            "squaredError": cost_functions.squaredError,
+            "crossEntropy": cost_functions.crossEntropy
         }
         self.costFunctionsDerivatives = {
-            "squaredError": cost_functions.squaredErrorDerivative
+            "squaredError": cost_functions.squaredErrorDerivative,
+            "crossEntropy": cost_functions.crossEntropyDerivative
         }
         self.costFunction: function = self.costFunctions[costFunction]
         self.costDerivative: function = self.costFunctionsDerivatives[costFunction]
