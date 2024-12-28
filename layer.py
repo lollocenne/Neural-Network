@@ -2,7 +2,7 @@ from __future__ import annotations
 import random
 
 class Layer:
-    def __init__(self, size: int, activationFunction: function):
+    def __init__(self, size: int, activationFunction: function, acrivationDerivative: function):
         self.nodes: list[float] = []    # nodes[i] = i-th node value
         self.weights: list[list[float]] = []    # weights[i][j] = j-th weight of the i-th node value (j-th weight = j-th node of the next layer)
         self.bias: list[float] = []    # nodes[i] = i-th node bias
@@ -20,6 +20,7 @@ class Layer:
         
         self.size = size
         self.activationFunction = activationFunction
+        self.activationDerivative = acrivationDerivative
     
     # Create the weights of this layer
     def connectToNextLayer(self, nextLayer: Layer):

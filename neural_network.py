@@ -1,29 +1,37 @@
-import math
 from layer import Layer
-
+import functions.activation_functions as activation_functions
+import functions.cost_functions as cost_functions
 
 class NeuralNetwork:
-    def __init__(self):
+    def __init__(self, costFunction: str = "squaredError"):
         self.layers: list[Layer] = []
         # To know more about activation functions see https://en.wikipedia.org/wiki/Activation_function#Table_of_activation_functions
         self.activationFunctions = {
-            "binaryStep": lambda x: 1 if x > 0 else 0,
-            "linear": lambda x: x,
-            "sigmoid": lambda x: 1 / (1 + math.exp(-x)),
-            "tanh": lambda x: math.tanh(x),
-            "relu": lambda x: max(0, x)
+            "binaryStep": activation_functions.binaryStep,
+            "linear": activation_functions.linear,
+            "sigmoid": activation_functions.sigmoid,
+            "tanh": activation_functions.tanh,
+            "relu": activation_functions.relu
         }
         self.activationFunctionsDerivatives = {
-            "binaryStep": lambda x: 0,
-            "linear": lambda x: 1,
-            "sigmoid": lambda x: self.activationFunctions["sigmoid"](x) * (1 - self.activationFunctions["sigmoid"](x)),
-            "tanh": lambda x: 1 - self.activationFunctions["tanh"](x) ** 2,
-            "relu": lambda x: 1 if x > 0 else 0
+            "binaryStep": activation_functions.binaryStepDerivative,
+            "linear": activation_functions.linearDerivative,
+            "sigmoid": activation_functions.sigmoidDerivative,
+            "tanh": activation_functions.tanhDerivative,
+            "relu": activation_functions.reluDerivative
         }
+        self.costFunctions = {
+            "squaredError": cost_functions.squaredError
+        }
+        self.costFunctionsDerivatives = {
+            "squaredError": cost_functions.squaredErrorDerivative
+        }
+        self.costFunction: function = self.costFunctions[costFunction]
+        self.costDerivative: function = self.costFunctionsDerivatives[costFunction]
     
     # Add a layer to the neural network, connect the last layer to the new layer
     def addLayer(self, size: int, activationFunction: str = "linear"):
-        self.layers.append(Layer(size, self.activationFunctions[activationFunction]))
+        self.layers.append(Layer(size, self.activationFunctions[activationFunction], self.activationFunctionsDerivatives[activationFunction]))
         if len(self.layers) > 1:
             self.layers[-2].connectToNextLayer(self.layers[-1])
     
@@ -40,17 +48,6 @@ class NeuralNetwork:
         
         return self.layers[-1].nodes
     
-    # Calculate the cost of a singol node
-    # This will be used only for the output nodes
-    @staticmethod
-    def nodeCost(x: float, Y: float) -> float:
-        """
-        x: output of the node
-        Y: expected output
-        """
-        error = x - Y
-        return error * error
-    
     # Calculate the cost of the neural network
     def cost(self, inputs: list[float], Y: list[float]) -> float:
         """
@@ -60,7 +57,7 @@ class NeuralNetwork:
         x: list[float] = self.forward(inputs)   # Output of the neural network
         cost: float = 0
         for i in range(self.layers[-1].size):
-            cost += self.nodeCost(x[i], Y[i])
+            cost += self.costFunction(x[i], Y[i])
         return cost
     
     # Learn using the gradient descent
@@ -111,7 +108,7 @@ class NeuralNetwork:
 
 
 if __name__ == "__main__":
-    nn = NeuralNetwork()
+    nn = NeuralNetwork("squaredError")
     nn.addLayer(2)
     nn.addLayer(3, "tanh")
     nn.addLayer(1, "sigmoid")
