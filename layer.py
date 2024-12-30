@@ -35,11 +35,14 @@ class Layer:
                 self.costGradientW[i].append(0)
     
     # Apply the gradients to the weights and bias
+    # Reset the gradients to 0 to prepare them for the next training
     def applyGradients(self, learningRate: float):
         for i in range(self.size):
             for j in range(len(self.weights[i])):
                 self.weights[i][j] -= self.costGradientW[i][j] * learningRate
+                self.costGradientW[i][j] = 0
             self.bias[i] -= self.costGradientB[i] * learningRate
+            self.costGradientB[i] = 0
     
     # Calculate the derivative of the cost function times the derivative of the activation function of the output layer
     def calculateOutputLayerActCos(self, expectedOutputs: list[float], costDerivative: function) -> list[float]:

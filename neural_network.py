@@ -69,7 +69,6 @@ class NeuralNetwork:
         self.updateGradients(xTrain, YTrain)
         for layer in self.layers:
             layer.applyGradients(learningRate)
-            layer.resetGradients()
     
     # Update the gradients of the neural network
     def updateGradients(self, inputs: list[float], Y: list[float]):
@@ -87,8 +86,7 @@ class NeuralNetwork:
     # Train the neural network
     def train(self, inputs: list[list[float]], expectedOutputs: list[list[float]], learningRate: float, batchSize: int = None):
         if batchSize is None: batchSize = len(inputs)
-        numBatches = (len(inputs) + batchSize - 1) // batchSize  # Arrotondamento verso l'alto
-
+        numBatches = (len(inputs) + batchSize - 1) // batchSize
         for batchIndex in range(numBatches):
             startIndex = batchIndex * batchSize
             endIndex = min(startIndex + batchSize, len(inputs))
