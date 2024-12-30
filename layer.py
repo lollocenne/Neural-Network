@@ -2,6 +2,7 @@ from __future__ import annotations
 import random
 
 class Layer:
+    BETA = 0.9
     def __init__(self, size: int, activationFunction: function, acrivationDerivative: function):
         self.nodes: list[float] = []    # nodes[i] = i-th node value
         self.weights: list[list[float]] = []    # weights[i][j] = j-th weight of the i-th node value (j-th weight = j-th node of the next layer)
@@ -10,8 +11,11 @@ class Layer:
         self.costGradientW: list[list[float]] = []    # costGradientW[i][j] = gradient of the cost function with respect to the j-th weight of the i-th node
         self.costGradientB: list[float] = []    # costGradientB[i] = gradient of the cost function with respect to the bias of the i-th node
         
-        self.weightedVal = []    # weightedVal[i] = i-th node value without the activation function
-        self.actCos = []    # actCos[i] = derivative of the activation function times the derivative of cost function of the i-th node
+        self.momentumW: list[list[float]] = []  # momentumW[i][j] = momentum of the weights[i][j]
+        self.momentumB: list[float] = []  # momentumB[i] = momentum of the bias[i]
+        
+        self.weightedVal: list[float] = []    # weightedVal[i] = i-th node value without the activation function
+        self.actCos: list[float] = []    # actCos[i] = derivative of the activation function times the derivative of cost function of the i-th node
         
         # Initialize the nodes, weights and bias
         for _ in range(size):
@@ -20,6 +24,8 @@ class Layer:
             self.bias.append(random.uniform(-1, 1))
             self.costGradientW.append([])
             self.costGradientB.append(0)
+            self.momentumW.append([])
+            self.momentumB.append(0)
             self.weightedVal.append(0)
             self.actCos.append(0)
         
@@ -33,15 +39,18 @@ class Layer:
             for _ in range(nextLayer.size):
                 self.weights[i].append(random.uniform(-1, 1))
                 self.costGradientW[i].append(0)
+                self.momentumW[i].append(0)
     
     # Apply the gradients to the weights and bias
     # Reset the gradients to 0 to prepare them for the next training
     def applyGradients(self, learningRate: float):
         for i in range(self.size):
             for j in range(len(self.weights[i])):
-                self.weights[i][j] -= self.costGradientW[i][j] * learningRate
+                self.momentumW[i][j] = Layer.BETA * self.momentumW[i][j] + (1 - Layer.BETA) * self.costGradientW[i][j]
+                self.weights[i][j] -= self.momentumW[i][j] * learningRate
                 self.costGradientW[i][j] = 0
-            self.bias[i] -= self.costGradientB[i] * learningRate
+            self.momentumB[i] = Layer.BETA * self.momentumB[i] + (1 - Layer.BETA) * self.costGradientB[i]
+            self.bias[i] -= self.momentumB[i] * learningRate
             self.costGradientB[i] = 0
     
     # Calculate the derivative of the cost function times the derivative of the activation function of the output layer

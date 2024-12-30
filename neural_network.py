@@ -110,7 +110,6 @@ if __name__ == "__main__":
     nn.addLayer(2)
     nn.addLayer(3, "tanh")
     nn.addLayer(1, "linear")
-    #print(nn.forward([0, 1]))
     
     
     x = [[2, 1]]
