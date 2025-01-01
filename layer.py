@@ -34,7 +34,7 @@ class Layer:
         self.activationDerivative = acrivationDerivative
     
     # Create the weights of this layer
-    def connectToNextLayer(self, nextLayer: Layer):
+    def connectToNextLayer(self, nextLayer: Layer) -> None:
         for i in range(self.size):
             for _ in range(nextLayer.size):
                 self.weights[i].append(random.uniform(-1, 1))
@@ -43,12 +43,14 @@ class Layer:
     
     # Apply the gradients to the weights and bias
     # Reset the gradients to 0 to prepare them for the next training
-    def applyGradients(self, learningRate: float):
+    def applyGradients(self, learningRate: float, batchSize: int) -> None:
         for i in range(self.size):
             for j in range(len(self.weights[i])):
+                self.costGradientW[i][j] /= batchSize
                 self.momentumW[i][j] = Layer.BETA * self.momentumW[i][j] + (1 - Layer.BETA) * self.costGradientW[i][j]
                 self.weights[i][j] -= self.momentumW[i][j] * learningRate
                 self.costGradientW[i][j] = 0
+            self.momentumB[i] /= batchSize
             self.momentumB[i] = Layer.BETA * self.momentumB[i] + (1 - Layer.BETA) * self.costGradientB[i]
             self.bias[i] -= self.momentumB[i] * learningRate
             self.costGradientB[i] = 0
@@ -62,30 +64,8 @@ class Layer:
             actCoss[i] = activationDerivative * costDerivativeVal
         return actCoss
     
-    # Reset the gradients to 0
-    def resetGradients(self):
-        for i in range(self.size):
-            for j in range(len(self.weights[i])):
-                self.costGradientW[i][j] = 0
-            self.costGradientB[i] = 0
-    
-    # Update the gradients of the layer except the input layer
-    def updateGradients(self, actCos: list[float], prevLayer: Layer):
-        for nodeIdx in range(self.size):
-            for prevNodeIdx in range(prevLayer.size):
-                derivativeCostWeight = actCos[nodeIdx] * prevLayer.nodes[prevNodeIdx]
-                prevLayer.costGradientW[prevNodeIdx][nodeIdx] += derivativeCostWeight
-            
-            derivativeCostBias = actCos[nodeIdx]
-            self.costGradientB[nodeIdx] += derivativeCostBias
-    
-    # Update the gradients of the input layer
-    def updateInputLayerGradients(self, actCos: list[float]):            
-        for nodeIdx in range(self.size):
-            derivativeCostBias = actCos[nodeIdx]
-            self.costGradientB[nodeIdx] += derivativeCostBias
-    
-    def calculateHiddenLayerActCos(self, nextActCos: list[float], nextLayer: Layer):
+    # Calculate the derivative of the cost function times the derivative of the activation function of the hidden layers
+    def calculateHiddenLayerActCos(self, nextActCos: list[float], nextLayer: Layer) -> list[float]:
         actCoss: list[float] = []
         for nodeIdx in range(self.size):
             actCos = 0
@@ -95,3 +75,18 @@ class Layer:
             actCos *= self.activationDerivative(self.weightedVal[nodeIdx])
             actCoss.append(actCos)
         return actCoss
+    
+    # Update the gradients of the layer except the input layer
+    def updateGradients(self, actCos: list[float], prevLayer: Layer) -> None:
+        for nodeIdx in range(self.size):
+            for prevNodeIdx in range(prevLayer.size):
+                derivativeCostWeight = actCos[nodeIdx] * prevLayer.nodes[prevNodeIdx]
+                prevLayer.costGradientW[prevNodeIdx][nodeIdx] += derivativeCostWeight
+            derivativeCostBias = actCos[nodeIdx]
+            self.costGradientB[nodeIdx] += derivativeCostBias
+    
+    # Update the gradients of the input layer
+    def updateInputLayerGradients(self, actCos: list[float]) -> None:            
+        for nodeIdx in range(self.size):
+            derivativeCostBias = actCos[nodeIdx]
+            self.costGradientB[nodeIdx] += derivativeCostBias

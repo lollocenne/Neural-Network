@@ -31,7 +31,7 @@ class NeuralNetwork:
         self.costDerivative: function = self.costFunctionsDerivatives[costFunction]
     
     # Add a layer to the neural network, connect the last layer to the new layer
-    def addLayer(self, size: int, activationFunction: str = "linear"):
+    def addLayer(self, size: int, activationFunction: str = "linear") -> None:
         self.layers.append(Layer(size, self.activationFunctions[activationFunction], self.activationFunctionsDerivatives[activationFunction]))
         if len(self.layers) > 1:
             self.layers[-2].connectToNextLayer(self.layers[-1])
@@ -65,13 +65,12 @@ class NeuralNetwork:
         return cost
     
     # Learn using the gradient descent
-    def learn(self, xTrain: list[float], YTrain: list[float], learningRate: float):
+    # The gradients will be applied in the train function to manage the batches
+    def learn(self, xTrain: list[float], YTrain: list[float]) -> None:
         self.updateGradients(xTrain, YTrain)
-        for layer in self.layers:
-            layer.applyGradients(learningRate)
     
     # Update the gradients of the neural network
-    def updateGradients(self, inputs: list[float], Y: list[float]):
+    def updateGradients(self, inputs: list[float], Y: list[float]) -> None:
         self.forward(inputs)
         # Output layer
         actCos = self.layers[-1].calculateOutputLayerActCos(Y, self.costDerivative)   # Activation function derivative times cost function derivative
@@ -85,8 +84,7 @@ class NeuralNetwork:
         self.layers[0].updateInputLayerGradients(actCos)
     
     # Train the neural network
-    def train(self, inputs: list[list[float]], expectedOutputs: list[list[float]], learningRate: float, batchSize: int = None, showProgress = False):
-        if batchSize is None: batchSize = len(inputs)
+    def train(self, inputs: list[list[float]], expectedOutputs: list[list[float]], learningRate: float, batchSize: int = 1, showProgress: bool = False) -> None:
         numBatches = (len(inputs) + batchSize - 1) // batchSize
         for batchIndex in range(numBatches):
             startIndex = batchIndex * batchSize
@@ -94,9 +92,11 @@ class NeuralNetwork:
             batchInputs = inputs[startIndex:endIndex]
             batchOutputs = expectedOutputs[startIndex:endIndex]
             for i in range(len(batchInputs)):
-                self.learn(batchInputs[i], batchOutputs[i], learningRate)
+                self.learn(batchInputs[i], batchOutputs[i])
                 if showProgress:
                     print(f"Training: {round((batchIndex + i + 1) * 100 / len(inputs), 2)}%")
+            for layer in self.layers:
+                layer.applyGradients(learningRate, len(batchInputs))
     
     
     def __str__(self):
