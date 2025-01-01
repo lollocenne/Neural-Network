@@ -1,9 +1,8 @@
-from __future__ import annotations
 import random
 
 class Layer:
     BETA = 0.9
-    def __init__(self, size: int, activationFunction: function, acrivationDerivative: function):
+    def __init__(self, size: int, activationFunction: "function", acrivationDerivative: "function"):
         self.nodes: list[float] = []    # nodes[i] = i-th node value
         self.weights: list[list[float]] = []    # weights[i][j] = j-th weight of the i-th node value (j-th weight = j-th node of the next layer)
         self.bias: list[float] = []    # nodes[i] = i-th node bias
@@ -34,7 +33,7 @@ class Layer:
         self.activationDerivative = acrivationDerivative
     
     # Create the weights of this layer
-    def connectToNextLayer(self, nextLayer: Layer) -> None:
+    def connectToNextLayer(self, nextLayer: "Layer") -> None:
         for i in range(self.size):
             for _ in range(nextLayer.size):
                 self.weights[i].append(random.uniform(-1, 1))
@@ -56,7 +55,7 @@ class Layer:
             self.costGradientB[i] = 0
     
     # Calculate the derivative of the cost function times the derivative of the activation function of the output layer
-    def calculateOutputLayerActCos(self, expectedOutputs: list[float], costDerivative: function) -> list[float]:
+    def calculateOutputLayerActCos(self, expectedOutputs: list[float], costDerivative: "function") -> list[float]:
         actCoss: list[float] = [0 for _ in range(len(expectedOutputs))]
         for i in range(len(expectedOutputs)):
             activationDerivative = self.activationDerivative(self.weightedVal[i])
@@ -65,7 +64,7 @@ class Layer:
         return actCoss
     
     # Calculate the derivative of the cost function times the derivative of the activation function of the hidden layers
-    def calculateHiddenLayerActCos(self, nextActCos: list[float], nextLayer: Layer) -> list[float]:
+    def calculateHiddenLayerActCos(self, nextActCos: list[float], nextLayer: "Layer") -> list[float]:
         actCoss: list[float] = []
         for nodeIdx in range(self.size):
             actCos = 0
@@ -77,7 +76,7 @@ class Layer:
         return actCoss
     
     # Update the gradients of the layer except the input layer
-    def updateGradients(self, actCos: list[float], prevLayer: Layer) -> None:
+    def updateGradients(self, actCos: list[float], prevLayer: "Layer") -> None:
         for nodeIdx in range(self.size):
             for prevNodeIdx in range(prevLayer.size):
                 derivativeCostWeight = actCos[nodeIdx] * prevLayer.nodes[prevNodeIdx]
