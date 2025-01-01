@@ -58,8 +58,8 @@ class Layer:
         actCoss: list[float] = [0 for _ in range(len(expectedOutputs))]
         for i in range(len(expectedOutputs)):
             activationDerivative = self.activationDerivative(self.weightedVal[i])
-            costDerivative = costDerivative(self.nodes[i], expectedOutputs[i])
-            actCoss[i] = activationDerivative * costDerivative
+            costDerivativeVal = costDerivative(self.nodes[i], expectedOutputs[i])
+            actCoss[i] = activationDerivative * costDerivativeVal
         return actCoss
     
     # Reset the gradients to 0

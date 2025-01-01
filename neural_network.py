@@ -81,10 +81,11 @@ class NeuralNetwork:
             actCos = self.layers[layerIdx].calculateHiddenLayerActCos(actCos, self.layers[layerIdx + 1])
             self.layers[layerIdx].updateGradients(actCos, self.layers[layerIdx - 1])
         # Input layer
+        actCos = self.layers[0].calculateHiddenLayerActCos(actCos, self.layers[1])
         self.layers[0].updateInputLayerGradients(actCos)
     
     # Train the neural network
-    def train(self, inputs: list[list[float]], expectedOutputs: list[list[float]], learningRate: float, batchSize: int = None):
+    def train(self, inputs: list[list[float]], expectedOutputs: list[list[float]], learningRate: float, batchSize: int = None, showProgress = False):
         if batchSize is None: batchSize = len(inputs)
         numBatches = (len(inputs) + batchSize - 1) // batchSize
         for batchIndex in range(numBatches):
@@ -94,6 +95,8 @@ class NeuralNetwork:
             batchOutputs = expectedOutputs[startIndex:endIndex]
             for i in range(len(batchInputs)):
                 self.learn(batchInputs[i], batchOutputs[i], learningRate)
+                if showProgress:
+                    print(f"Training: {round((batchIndex + i + 1) * 100 / len(inputs), 2)}%")
     
     
     def __str__(self):
