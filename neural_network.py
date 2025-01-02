@@ -1,3 +1,5 @@
+import os
+import pickle
 from layer import Layer
 import functions.activation_functions as activation_functions
 import functions.cost_functions as cost_functions
@@ -99,6 +101,17 @@ class NeuralNetwork:
                 layer.applyGradients(learningRate, len(batchInputs))
     
     
+    def save(self, id: str = "") -> None:
+        # Use id to save multiple models
+        if not os.path.isdir("saves"): os.mkdir("saves")
+        with open(f"saves/save{id}.pkl", "wb") as file:
+            pickle.dump(self, file)
+    
+    def getFromSave(self, id: str = "") -> "NeuralNetwork":
+        # Use id to load multiple models
+        with open(f"saves/save{id}.pkl", "rb") as file:
+            return pickle.load(file)
+    
     def __str__(self):
         neuralNetwork = ""
         for layer in self.layers:
@@ -117,6 +130,12 @@ if __name__ == "__main__":
     
     x = [[2, 1]]
     Y = [[3]]
-    while True:
+    for i in range(40000):
         nn.train(x, Y, 0.0001)
         print(nn.forward(x[0]))
+    
+    # Save the model
+    nn.save()
+    # Load the model
+    nn = NeuralNetwork().getFromSave()
+    print(nn.forward([2, 1]))
