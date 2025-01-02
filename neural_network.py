@@ -96,7 +96,7 @@ class NeuralNetwork:
             for i in range(len(batchInputs)):
                 self.learn(batchInputs[i], batchOutputs[i])
                 if showProgress:
-                    print(f"Training: {round((batchIndex + i + 1) * 100 / len(inputs), 2)}%")
+                    print(f"Training: {round(((batchIndex * batchSize) + i + 1) * 100 / len(inputs), 2)}%")
             for layer in self.layers:
                 layer.applyGradients(learningRate, len(batchInputs))
     
