@@ -109,8 +109,11 @@ class NeuralNetwork:
     
     def getFromSave(self, id: str = "") -> "NeuralNetwork":
         # Use id to load multiple models
-        with open(f"saves/save{id}.pkl", "rb") as file:
-            return pickle.load(file)
+        try:
+            with open(f"saves/save{id}.pkl", "rb") as file:
+                return pickle.load(file)
+        except FileNotFoundError:
+            return None
     
     def __str__(self):
         neuralNetwork = ""
