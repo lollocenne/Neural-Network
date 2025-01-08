@@ -34,12 +34,19 @@ class NeuralNetwork:
     
     # Add a layer to the neural network, connect the last layer to the new layer
     def addLayer(self, size: int, activationFunction: str = "linear") -> None:
+        """
+        `size`: number of neurons in the layer
+        `activationFunction`: activation function of the layer
+        """
         self.layers.append(Layer(size, self.activationFunctions[activationFunction], self.activationFunctionsDerivatives[activationFunction]))
         if len(self.layers) > 1:
             self.layers[-2].connectToNextLayer(self.layers[-1])
     
     # Forward propagation
     def forward(self, inputs: list[float]) -> list[float]:
+        """
+        Calculate the output of a given input
+        """
         for inputNodeIdx in range(self.layers[0].size):
             self.layers[0].weightedVal[inputNodeIdx] = inputs[inputNodeIdx]
             self.layers[0].nodes[inputNodeIdx] = self.layers[0].activationFunction(inputs[inputNodeIdx])
@@ -56,10 +63,8 @@ class NeuralNetwork:
     
     # Calculate the cost of the neural network
     def cost(self, inputs: list[float], Y: list[float]) -> float:
-        """
-        inputs: input of the neural network
-        Y: expected output (for heach node)
-        """
+        # inputs: input of the neural network
+        # Y: expected output (for heach node)
         x: list[float] = self.forward(inputs)   # Output of the neural network
         cost: float = 0
         for i in range(self.layers[-1].size):
@@ -87,6 +92,11 @@ class NeuralNetwork:
     
     # Train the neural network
     def train(self, inputs: list[list[float]], expectedOutputs: list[list[float]], learningRate: float, batchSize: int = 1, showProgress: bool = False) -> None:
+        """
+        `inputs`: a list that contains all the inputs (every input must be a list)
+        `expectedOutputs`: a list that contains all the expected output for each input (every output must be a list)
+        `showProgress`: print how many inputs have been elaborated in percentage
+        """
         numBatches = (len(inputs) + batchSize - 1) // batchSize
         for batchIndex in range(numBatches):
             startIndex = batchIndex * batchSize
@@ -102,13 +112,20 @@ class NeuralNetwork:
     
     
     def save(self, id: str = "") -> None:
-        # Use id to save multiple models
+        """
+        Save the neural network in a file named `"save" + id` in a directory `saves`.
+        Use `id` to store multiple neural networks and differentiate them.
+        If the file or the folder do not exist they will be created
+        """
         if not os.path.isdir("saves"): os.mkdir("saves")
         with open(f"saves/save{id}.pkl", "wb") as file:
             pickle.dump(self, file)
     
     def getFromSave(self, id: str = "") -> "NeuralNetwork":
-        # Use id to load multiple models
+        """
+        Return a saved neural network.
+        If the file or the folder do not exist it will return `None`
+        """
         try:
             with open(f"saves/save{id}.pkl", "rb") as file:
                 return pickle.load(file)
